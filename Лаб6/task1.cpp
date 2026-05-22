@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include <thread>
+#include <algorithm>
 
 using namespace std;
 
@@ -140,7 +141,8 @@ void addHWSpaceship(vector<vector<int>>& matrx, int x, int y) {
     matrx[x + 2][y + 5] = 1;
     matrx[x + 3][y] = matrx[x + 3][y + 3] = matrx[x + 3][y + 4] = matrx[x + 3][y + 5] = 1;
 }
-void addQueenBee(vector<vector<int>>& matrx, int x, int y) {
+void addQueenBee(vector<vector<int>>&
+matrx, int x, int y) {
     matrx[x][y + 1] = matrx[x][y + 2] = 1;
     matrx[x + 1][y] = matrx[x + 1][y + 3] = 1;
     matrx[x + 2][y + 1] = matrx[x + 2][y + 2] = 1;
@@ -232,7 +234,6 @@ void lifeMenu(int m, int n) {
         }
     }
 }
-
 
 int main() {
     setlocale(LC_ALL, "rus");
