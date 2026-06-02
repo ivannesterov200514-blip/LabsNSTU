@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include "cep_drob.h"
 
 // Расширенный алгоритм евклида для поиска коэф. Безу и цепной дроби
@@ -42,49 +41,4 @@ pair<int64_t, int64_t> priv_sol(int64_t& d, int64_t& gcd, int64_t& u, int64_t& v
     int64_t a0 = u * s;
     int64_t b0 = v * s;
     return { a0, b0 };
-=======
-#include "cep_drob.h"
-
-// Расширенный алгоритм евклида для поиска коэф. Безу и цепной дроби
-pair<int64_t, vector<int64_t>> gcd_euclidext(int64_t a, int64_t b, int64_t& u, int64_t& v) {
-    int64_t u_prev = 1, v_prev = 0, u_curr = 0, v_curr = 1;
-    int64_t r1 = a, r2 = b;
-    vector<int64_t> res;
-
-    cout << "\nr\t\tu\t\tv\t\tq\n";
-    cout << "-----------------------------------------------------------\n";
-    cout << r1 << "\t\t" << u_prev << "\t\t" << v_prev << "\n";
-    cout << r2 << "\t\t" << u_curr << "\t\t" << v_curr << "\n";
-
-    while (r2 != 0) {
-        int64_t q = r1 / r2;
-        res.push_back(q);
-
-        int64_t temp = r2;
-        r2 = r1 - r2 * q;
-        r1 = temp;
-
-        temp = u_curr;
-        u_curr = u_prev - q * u_curr;
-        u_prev = temp;
-
-        temp = v_curr;
-        v_curr = v_prev - q * v_curr;
-        v_prev = temp;
-
-        cout << r2 << "\t\t" << u_curr << "\t\t" << v_curr << "\t\t" << q << "\n";
-    }
-
-    u = u_prev;
-    v = v_prev;
-    return { r1, res };
-}
-
-// Частное решение
-pair<int64_t, int64_t> priv_sol(int64_t& d, int64_t& gcd, int64_t& u, int64_t& v) {
-    int64_t s = d / gcd;
-    int64_t a0 = u * s;
-    int64_t b0 = v * s;
-    return { a0, b0 };
->>>>>>> 05ec7888d741d95755c8845f0090f27b7e6d8528
 }
