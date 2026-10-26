@@ -16,11 +16,13 @@ fn new_node(data: &str, next: Link, prev: Option<Weak<RefCell<SNode>>>) -> Rc<Re
 #[derive(Default)]
 pub struct DList {
     head: Link,
+    tail: Link,
     sz: i32,
 }
 
 impl Drop for DList {
     fn drop(&mut self) {
+        self.tail = None;
         let mut cur = self.head.take();
         while let Some(node) = cur {
             cur = node.borrow_mut().next.take();
@@ -40,17 +42,6 @@ impl DList {
         None
     }
 
-    fn last(&self) -> Link {
-        let mut cur = self.head.clone()?;
-        loop {
-            let next = cur.borrow().next.clone();
-            match next {
-                Some(n) => cur = n,
-                None => return Some(cur),
-            }
-        }
-    }
-
     fn unlink(&mut self, v: &Rc<RefCell<SNode>>) {
         let prev: Link = v.borrow().prev.as_ref().and_then(|w| w.upgrade());
         let next: Link = v.borrow_mut().next.take();
@@ -58,31 +49,32 @@ impl DList {
             Some(p) => p.borrow_mut().next = next.clone(),
             None => self.head = next.clone(),
         }
-        if let Some(nx) = &next {
-            nx.borrow_mut().prev = prev.as_ref().map(Rc::downgrade);
+        match &next {
+            Some(nx) => nx.borrow_mut().prev = prev.as_ref().map(Rc::downgrade),
+            None => self.tail = prev.clone(),
         }
         self.sz -= 1;
     }
 
     pub fn insert_head(&mut self, val: &str) {
         let n = new_node(val, self.head.clone(), None);
-        if let Some(h) = &self.head {
-            h.borrow_mut().prev = Some(Rc::downgrade(&n));
+        match &self.head {
+            Some(h) => h.borrow_mut().prev = Some(Rc::downgrade(&n)),
+            None => self.tail = Some(n.clone()),
         }
         self.head = Some(n);
         self.sz += 1;
     }
 
     pub fn insert_tail(&mut self, val: &str) {
-        match self.last() {
-            None => {
-                self.head = Some(new_node(val, None, None));
+        let n = new_node(val, None, self.tail.as_ref().map(Rc::downgrade));
+        match self.tail.take() {
+            Some(t) => {
+                t.borrow_mut().next = Some(n.clone());
             }
-            Some(last) => {
-                let n = new_node(val, None, Some(Rc::downgrade(&last)));
-                last.borrow_mut().next = Some(n);
-            }
+            None => self.head = Some(n.clone()),
         }
+        self.tail = Some(n);
         self.sz += 1;
     }
 
@@ -114,8 +106,9 @@ impl DList {
         };
         let next: Link = cur.borrow().next.clone();
         let n = new_node(val, next.clone(), Some(Rc::downgrade(&cur)));
-        if let Some(nx) = &next {
-            nx.borrow_mut().prev = Some(Rc::downgrade(&n));
+        match &next {
+            Some(nx) => nx.borrow_mut().prev = Some(Rc::downgrade(&n)),
+            None => self.tail = Some(n.clone()),
         }
         cur.borrow_mut().next = Some(n);
         self.sz += 1;
@@ -136,7 +129,7 @@ impl DList {
     }
 
     pub fn delete_tail(&mut self) {
-        let last = match self.last() {
+        let last = match self.tail.clone() {
             Some(l) => l,
             None => {
                 println!("Ошибка: Список пуст");
